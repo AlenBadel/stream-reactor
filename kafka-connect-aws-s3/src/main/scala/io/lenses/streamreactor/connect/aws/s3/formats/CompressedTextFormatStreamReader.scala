@@ -18,9 +18,10 @@ package io.lenses.streamreactor.connect.aws.s3.formats
 
 import io.lenses.streamreactor.connect.aws.s3.model.StringSourceData
 import io.lenses.streamreactor.connect.aws.s3.model.location.RemoteS3PathLocation
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream
 
 import java.io.InputStream
-import java.util.zip.GZIPInputStream
+import java.util.Base64
 import scala.io.Source
 import scala.util.Try
 
@@ -28,7 +29,9 @@ class CompressedTextFormatStreamReader(inputStreamFn: () => InputStream, bucketA
   extends S3FormatStreamReader[StringSourceData] {
 
   private val inputStream: InputStream = inputStreamFn()
-  private val source        = Source.fromInputStream(new GZIPInputStream(inputStream), "UTF-8")
+  private val decompressedStream = new ZstdCompressorInputStream(inputStream)
+  private val decodedSteam = Base64.getDecoder().wrap(decompressedStream)
+  private val source        = Source.fromInputStream(decodedSteam, "UTF-8")
   protected val sourceLines = source.getLines()
   protected var lineNumber: Long = -1
 
@@ -43,7 +46,9 @@ class CompressedTextFormatStreamReader(inputStreamFn: () => InputStream, bucketA
         "Invalid state reached: the file content has been consumed, no further calls to next() are possible.",
       )
     }
-    StringSourceData(sourceLines.next(), lineNumber)
+    val nextLine = sourceLines.next()
+    val jsonEntry = nextLine.split("\t").last
+    StringSourceData(jsonEntry, lineNumber)
   }
 
   override def getBucketAndPath: RemoteS3PathLocation = bucketAndPath

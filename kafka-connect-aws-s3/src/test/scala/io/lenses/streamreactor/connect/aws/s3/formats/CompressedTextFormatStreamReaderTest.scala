@@ -23,11 +23,14 @@ import io.lenses.streamreactor.connect.aws.s3.utils.TestSampleSchemaAndData
 import io.lenses.streamreactor.connect.aws.s3.utils.TestSampleSchemaAndData.firstUsers
 import io.lenses.streamreactor.connect.aws.s3.utils.TestSampleSchemaAndData.topic
 import io.lenses.streamreactor.connect.aws.s3.stream.S3ByteArrayOutputStream
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.io.ByteArrayInputStream
-import java.util.zip.ZipOutputStream
+import java.io.ByteArrayOutputStream
+import java.util.Base64
+import java.util.Date
 
 class CompressedTextFormatStreamReaderTest extends AnyFlatSpec with Matchers {
 
@@ -49,12 +52,23 @@ class CompressedTextFormatStreamReaderTest extends AnyFlatSpec with Matchers {
 
   private def writeRecordsToOutputStream = {
     val outputStream     = new S3ByteArrayOutputStream()
+    val date = new Date()
     val jsonFormatWriter = new JsonFormatWriter(() => outputStream)
-    firstUsers.foreach(data => jsonFormatWriter.write(None, StructSinkData(data), topic))
+    firstUsers.foreach(data => {
+      val dateString = date.toString + "\t"
+      outputStream.write(dateString.getBytes)
+      jsonFormatWriter.write(None, StructSinkData(data), topic)
+    }
+    )
     jsonFormatWriter.complete()
 
-    val bufferedStream = new ZipOutputStream(outputStream)
-    val byteArrayInputStream = new ByteArrayInputStream(bufferedStream.toByteArray)
+    val encodedResult = Base64.getEncoder.encode(outputStream.toByteArray)
+    val bos = new ByteArrayOutputStream(encodedResult.length)
+    val compressedResult = new ZstdCompressorOutputStream(bos)
+    compressedResult.write(encodedResult)
+    compressedResult.close()
+
+    val byteArrayInputStream = new ByteArrayInputStream(bos.toByteArray)
     byteArrayInputStream
   }
 }
