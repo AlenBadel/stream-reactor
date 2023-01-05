@@ -138,6 +138,13 @@ class AwsS3StorageInterface(connectorName: String, s3Client: S3Client)
         value.asRight
     }
 
+  override def getBlobDecompressedAsStream(bucketAndPath: RemoteS3PathLocation): InputStream {
+    val blobAsInputStream = getBlob(bucketAndPath)
+    InputStream decompressedStream = new GZIPInputStream(blobAsInputStream)
+    InputStream decodedSteam = Base64.getDecoder().wrap(decompressedStream)
+    return decodedSteam
+  }
+
   override def getBlobSize(bucketAndPath: RemoteS3PathLocation): Either[String, Long] =
     Try(headBlobInner(bucketAndPath).contentLength().toLong).toEither.leftMap(_.getMessage)
 
