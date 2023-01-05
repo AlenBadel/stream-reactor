@@ -28,7 +28,7 @@ class CompressedTextFormatStreamReader(inputStreamFn: () => InputStream, bucketA
   extends S3FormatStreamReader[StringSourceData] {
 
   private val inputStream: InputStream = inputStreamFn()
-  private val source        = Source.fromInputStream(GZIPInputStream(inputStream), "UTF-8")
+  private val source        = Source.fromInputStream(new GZIPInputStream(inputStream), "UTF-8")
   protected val sourceLines = source.getLines()
   protected var lineNumber: Long = -1
 
