@@ -65,10 +65,10 @@ object Dependencies {
     val kindProjectorVersion    = "0.13.2"
     val betterMonadicForVersion = "0.3.1"
 
-    val slf4jVersion = "1.7.36"
+    val slf4jVersion = "2.0.6"
 
-    val logbackVersion      = "2.0.6"
-    val scalaLoggingVersion = "3.9.4"
+    val logbackVersion      = "1.4.5"
+    val scalaLoggingVersion = "3.9.5"
     val classGraphVersions  = "4.8.146"
 
     val wiremockJre8Version = "2.33.2"
