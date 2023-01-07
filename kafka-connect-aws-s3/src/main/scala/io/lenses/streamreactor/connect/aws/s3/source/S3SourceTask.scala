@@ -58,7 +58,7 @@ class S3SourceTask extends SourceTask with LazyLogging {
   override def start(props: util.Map[String, String]): Unit = {
     sourceName = getSourceName(props).getOrElse("MissingSourceName")
 
-    logger.debug(s"Received call to S3SourceTask.start with ${props.size()} properties")
+    logger.info(s"Received call to S3SourceTask.start with ${props.size()} properties")
     val contextFn: RemoteS3RootLocation => Option[RemoteS3PathLocationWithLine] = new ContextReader(() =>
       context,
     ).getCurrentOffset
@@ -93,7 +93,7 @@ class S3SourceTask extends SourceTask with LazyLogging {
     getSourceName(props).getOrElse("EmptySourceName")
 
   override def stop(): Unit = {
-    logger.debug(s"Received call to S3SinkTask.stop")
+    logger.info(s"Received call to S3SinkTask.stop")
 
     readerManagers.foreach(_.close())
   }

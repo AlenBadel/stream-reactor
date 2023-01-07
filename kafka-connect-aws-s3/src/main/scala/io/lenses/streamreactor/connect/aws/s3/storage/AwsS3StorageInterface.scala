@@ -69,7 +69,7 @@ class AwsS3StorageInterface(connectorName: String, s3Client: S3Client)
 
   override def uploadFile(source: File, target: RemoteS3PathLocation): Either[UploadError, Unit] = {
 
-    logger.debug(s"[{}] AWS Uploading file from local {} to s3 {}", connectorName, source, target)
+    logger.info(s"[{}] AWS Uploading file from local {} to s3 {}", connectorName, source, target)
 
     if (!source.exists()) {
       NonExistingFileError(source).asLeft
@@ -89,14 +89,14 @@ class AwsS3StorageInterface(connectorName: String, s3Client: S3Client)
           logger.error(s"[{}] Failed upload from local {} to s3 {}", connectorName, source, target, exception)
           UploadFailedError(exception, source).asLeft
         case Success(_) =>
-          logger.debug(s"[{}] Completed upload from local {} to s3 {}", connectorName, source, target)
+          logger.info(s"[{}] Completed upload from local {} to s3 {}", connectorName, source, target)
           ().asRight
       }
   }
 
   override def pathExists(bucketAndPath: RemoteS3PathLocation): Either[FileLoadError, Boolean] = {
 
-    logger.debug(s"[{}] Path exists? {}", connectorName, bucketAndPath)
+    logger.info(s"[{}] Path exists? {}", connectorName, bucketAndPath)
 
     Try {
       s3Client.listObjectsV2(
@@ -143,7 +143,7 @@ class AwsS3StorageInterface(connectorName: String, s3Client: S3Client)
 
   override def list(bucketAndPrefix: RemoteS3PathLocation): Either[FileListError, List[String]] = Try {
 
-    logger.debug(s"[{}] List path {}", connectorName, bucketAndPrefix)
+    logger.info(s"[{}] List path {}", connectorName, bucketAndPrefix)
 
     val options = ListObjectsV2Request.builder().bucket(bucketAndPrefix.bucket).prefix(bucketAndPrefix.path)
 
@@ -203,7 +203,7 @@ class AwsS3StorageInterface(connectorName: String, s3Client: S3Client)
     Try(headBlobInner(location).lastModified()).toEither.leftMap(_.getMessage)
 
   override def writeStringToFile(target: RemoteS3PathLocation, data: String): Either[UploadError, Unit] = {
-    logger.debug(s"[{}] Uploading file from data string ({}) to s3 {}", connectorName, data, target)
+    logger.info(s"[{}] Uploading file from data string ({}) to s3 {}", connectorName, data, target)
 
     if (data.isEmpty) {
       EmptyContentsStringError(data).asLeft
@@ -223,7 +223,7 @@ class AwsS3StorageInterface(connectorName: String, s3Client: S3Client)
           logger.error(s"[{}] Failed upload from data string ({}) to s3 {}", connectorName, data, target, exception)
           FileCreateError(exception, data).asLeft
         case Success(_) =>
-          logger.debug(s"[{}] Completed upload from data string ({}) to s3 {}", connectorName, data, target)
+          logger.info(s"[{}] Completed upload from data string ({}) to s3 {}", connectorName, data, target)
           ().asRight
       }
     }

@@ -39,10 +39,10 @@ class ResultReader(
 
     val results: Vector[_ <: SourceData] = retrieveResults(limit, reader, Vector.empty[SourceData])
     if (results.isEmpty) {
-      logger.trace(s"No results found in reader ${reader.getBucketAndPath}")
+      logger.info(s"No results found in reader ${reader.getBucketAndPath}")
       Option.empty[PollResults]
     } else {
-      logger.trace(s"Results found in reader ${reader.getBucketAndPath}")
+      logger.info(s"Results found in reader ${reader.getBucketAndPath}")
       Some(
         PollResults(
           results,
@@ -61,7 +61,7 @@ class ResultReader(
     accumulatedResults: Vector[_ <: SourceData],
   ): Vector[_ <: SourceData] = {
 
-    logger.trace(
+    logger.info(
       s"Calling retrieveResults with limit ($limit), reader (${reader.getBucketAndPath}/${reader.getLineNumber}), accumulatedResults size ${accumulatedResults.size}",
     )
     if (limit > 0 && reader.hasNext) {

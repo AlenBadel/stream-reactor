@@ -54,13 +54,13 @@ class S3ReaderManager(
         case Left(exception: Throwable) =>
           toExceptionState(exception)
         case Right(Some(nextFile)) =>
-          logger.debug(s"[$sourceName] readNextFile - Next file ($nextFile) found")
+          logger.info(s"[$sourceName] readNextFile - Next file ($nextFile) found")
           readerFn(nextFile) match {
             case Right(reader)   => toInitialisedState(reader)
             case Left(exception) => toExceptionState(exception)
           }
         case Right(None) =>
-          logger.debug(s"[$sourceName] readNextFile - No next file found")
+          logger.info(s"[$sourceName] readNextFile - No next file found")
           toNoFurtherFilesState()
       }
 
@@ -72,14 +72,14 @@ class S3ReaderManager(
   }
 
   case class EmptyReaderState() extends MoreFilesAvailableState {
-    logger.trace(s"[$sourceName] state: EMPTY")
+    logger.info(s"[$sourceName] state: EMPTY")
     override def hasReader: Boolean = false
   }
 
   case class InitialisedReaderState(currentReader: ResultReader) extends ReaderState {
     def retrieveResults(limit: Int) = currentReader.retrieveResults(limit)
 
-    logger.trace(s"[$sourceName] state: INITIALISED")
+    logger.info(s"[$sourceName] state: INITIALISED")
     override def close(): Unit = currentReader.close()
 
     override def hasReader: Boolean = true
@@ -92,17 +92,17 @@ class S3ReaderManager(
   }
 
   case class CompleteReaderState() extends MoreFilesAvailableState {
-    logger.trace(s"[$sourceName] state: COMPLETE")
+    logger.info(s"[$sourceName] state: COMPLETE")
     override def hasReader: Boolean = false
   }
 
   case class NoMoreFilesReaderState() extends MoreFilesAvailableState {
-    logger.trace(s"[$sourceName] state: NO MORE FILES")
+    logger.info(s"[$sourceName] state: NO MORE FILES")
     override def hasReader: Boolean = false
   }
 
   case class ExceptionReaderState(exception: Throwable) extends ReaderState {
-    logger.trace(s"[$sourceName] state: EXCEPTION")
+    logger.info(s"[$sourceName] state: EXCEPTION")
     override def hasReader: Boolean = false
   }
 
@@ -110,7 +110,7 @@ class S3ReaderManager(
   startingOffset.foreach(fileSource.init)
 
   def poll(): Vector[PollResults] = {
-    logger.debug(s"[$sourceName] start poll()")
+    logger.info(s"[$sourceName] start poll()")
 
     var allResults: Vector[PollResults] = Vector()
 
@@ -147,7 +147,7 @@ class S3ReaderManager(
 
     } while (allLimit > 0 && moreFiles)
 
-    logger.debug(s"[$sourceName] exit poll()")
+    logger.info(s"[$sourceName] exit poll()")
     allResults
   }
 
