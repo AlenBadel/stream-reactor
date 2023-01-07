@@ -23,7 +23,7 @@
     </appender>
     <logger name="io.lenses" level="TRACE"/>
     <logger name="com.amazonaws.auth.profile.internal" level="ERROR"/>
-    <root level="INFO">
+    <root level="TRACE">
         <appender-ref ref="stdout"/>
     </root>
 </configuration>
